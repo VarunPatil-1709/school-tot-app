@@ -3,11 +3,13 @@ package com.school.tutorialApp.service;
 import com.school.tutorialApp.dto.ClassRequest;
 import com.school.tutorialApp.dto.ClassResponse;
 import com.school.tutorialApp.entity.SchoolClass;
+import com.school.tutorialApp.exception.ResourceNotFoundException;
 import com.school.tutorialApp.repository.ClassRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,7 +24,6 @@ public class ClassService {
             System.out.println("Your request is null");
         }
         SchoolClass clazz = new SchoolClass();
-//        clazz.setId(UUID.randomUUID());
         clazz.setName(request.getName());
         clazz.setDescription(request.getDescription());
         clazz.setCreatedAt(LocalDateTime.now());
@@ -42,5 +43,16 @@ public class ClassService {
         classResponse.setCreatedAt(schoolClass.getCreatedAt());
         classResponse.setUpdatedAt(schoolClass.getUpdatedAt());
         return  classResponse;
+    }
+
+    public ClassResponse getClassById(UUID id){
+        if(id == null){
+          throw new ResourceNotFoundException("Id is null");
+        }
+       Optional<SchoolClass> schoolClass = classRepository.findById(id);
+        if(schoolClass.isPresent()){
+            return convertSchoolClassTOClassResponse(schoolClass.get());
+        }
+        throw new ResourceNotFoundException("Id Not found");
     }
 }
